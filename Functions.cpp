@@ -1,5 +1,6 @@
 ﻿#include "Functions.h"
 #include <queue>
+#include <mutex>
 
 void CovertTo_OrgnizedPointCloud(PCXYZ_Ptr &Source, double Width, double Height);
 void CovertTo_UnOrgnizedPointCloud(PCXYZ_Ptr &Source);
@@ -8,26 +9,27 @@ Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output);
 //滤波处理
 enum PointCloudProcessMode{Capture, Process};
 //先是数据读入状态，接收【当前机械臂位姿】信号
-bool isBusy = false;//是否正在处理点云。
+//bool isBusy = false;//是否正在处理点云。
 PointCloudProcessMode SystemMode = Capture;
 
 PCXYZ_Ptr PointsOfTable(new PCXYZ);//合成后的桌子的点云。
 std::queue<PCXYZ_Ptr> queue_PointsOfCapture;//被捕获的点云的存放队列。
 std::queue<Eigen::Matrix4f> queue_TransformData;//被捕获的点云的位姿矩阵。
+std::mutex QueueMutex;
 // 作为主动触发的函数
 std::string Capture_PointClould(double TransformData[4][4])/****RTM****/
 {
 	PCXYZ_Ptr DataIn = PCXYZ_Ptr(new PCXYZ());//到时候换成RTM点云输入变量。
 
-	if (isBusy)
-		return "Processing!";
-	while (isBusy);
-	isBusy = true;
+	if (!QueueMutex.try_lock())
+		std::cout << "Processing!" << std:endl;
+	while (!QueueMutex.try_lock());
+	//isBusy = true;
 
 	queue_PointsOfCapture.push(DataIn);
 	queue_TransformData.push(MakeTransformMatrix(TransformData));
 
-	isBusy = false;
+	QueueMutex.unlock();
 
 	return "Capture_PointClould() Success!";
 }
@@ -38,13 +40,13 @@ void Transform_PointCloud()
 	if (SystemMode != Capture)
 		return;
 
-	if (isBusy)
+	if (!QueueMutex.try_lock())
 		return;
-	isBusy = true;//防止队列（在RTM中）的多线程调用冲突。
+	//isBusy = true;//防止队列（在RTM中）的多线程调用冲突。
 
 	if (queue_PointsOfCapture.empty() || queue_TransformData.empty())
 	{
-		isBusy = false;
+		QueueMutex.unlock();
 		return;
 	}
 
@@ -58,7 +60,7 @@ void Transform_PointCloud()
 	queue_PointsOfCapture.pop();
 	queue_TransformData.pop();
 
-	isBusy = false;//关闭忙标志，使能队列操作。
+	QueueMutex.unlock();//关闭忙标志，使能队列操作。
 
 	Filters(tmp, tmp2);
 
@@ -72,9 +74,9 @@ void Transform_PointCloud()
 //主动触发
 std::string Clear_QueueAndPoints()
 {
-	if (isBusy)
+	if (!QueueMutex.try_lock())
 		return "Processing!";
-	isBusy = true;
+	//isBusy = true;
 
 	(*PointsOfTable).clear();
 
@@ -83,7 +85,7 @@ std::string Clear_QueueAndPoints()
 	while (!queue_TransformData.empty())
 		queue_TransformData.pop();
 
-	isBusy = false;
+	QueueMutex.unlock();
 
 	return "Clear_Queue_Points() Success!";
 }
