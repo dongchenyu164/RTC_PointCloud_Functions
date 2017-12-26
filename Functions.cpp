@@ -5,19 +5,19 @@ void CovertTo_OrgnizedPointCloud(PCXYZ_Ptr &Source, double Width, double Height)
 void CovertTo_UnOrgnizedPointCloud(PCXYZ_Ptr &Source);
 Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output);
 
-//ÂË²¨´¦Àí
+//ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½
 enum PointCloudProcessMode{Capture, Process};
-//ÏÈÊÇÊý¾Ý¶ÁÈë×´Ì¬£¬½ÓÊÕ¡¾µ±Ç°»úÐµ±ÛÎ»×Ë¡¿ÐÅºÅ
-bool isBusy = false;//ÊÇ·ñÕýÔÚ´¦ÀíµãÔÆ¡£
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¶ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Õ¡ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Ðµï¿½ï¿½Î»ï¿½Ë¡ï¿½ï¿½Åºï¿½
+bool isBusy = false;//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½Æ¡ï¿½
 PointCloudProcessMode SystemMode = Capture;
 
-PCXYZ_Ptr PointsOfTable(new PCXYZ);//ºÏ³ÉºóµÄ×À×ÓµÄµãÔÆ¡£
-std::queue<PCXYZ_Ptr> queue_PointsOfCapture;//±»²¶»ñµÄµãÔÆµÄ´æ·Å¶ÓÁÐ¡£
-std::queue<Eigen::Matrix4f> queue_TransformData;//±»²¶»ñµÄµãÔÆµÄÎ»×Ë¾ØÕó¡£
-// ×÷ÎªÖ÷¶¯´¥·¢µÄº¯Êý
+PCXYZ_Ptr PointsOfTable(new PCXYZ);//ï¿½Ï³Éºï¿½ï¿½ï¿½ï¿½ï¿½ÓµÄµï¿½ï¿½Æ¡ï¿½
+std::queue<PCXYZ_Ptr> queue_PointsOfCapture;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ÆµÄ´ï¿½Å¶ï¿½ï¿½Ð¡ï¿½
+std::queue<Eigen::Matrix4f> queue_TransformData;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½Æµï¿½Î»ï¿½Ë¾ï¿½ï¿½ï¿½
+// ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äºï¿½ï¿½ï¿½
 std::string Capture_PointClould(double TransformData[4][4])/****RTM****/
 {
-	PCXYZ_Ptr DataIn = PCXYZ_Ptr(new PCXYZ());//µ½Ê±ºò»»³ÉRTMµãÔÆÊäÈë±äÁ¿¡£
+	PCXYZ_Ptr DataIn = PCXYZ_Ptr(new PCXYZ());//ï¿½ï¿½Ê±ï¿½ò»»³ï¿½RTMï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	if (isBusy)
 		return "Processing!";
@@ -32,7 +32,7 @@ std::string Capture_PointClould(double TransformData[4][4])/****RTM****/
 	return "Capture_PointClould() Success!";
 }
 
-//Ó¦¸ÃÔÚOnExecuteº¯ÊýÄÚ£¬ÔÚ ÅÄÉã Ä£Ê½Ê±£¬Ã¿ÖÜÆÚµ÷ÓÃ¡£
+//Ó¦ï¿½ï¿½ï¿½ï¿½OnExecuteï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ä£Ê½Ê±ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½Úµï¿½ï¿½Ã¡ï¿½
 void Transform_PointCloud()
 {
 	if (SystemMode != Capture)
@@ -40,7 +40,7 @@ void Transform_PointCloud()
 
 	if (isBusy)
 		return;
-	isBusy = true;//·ÀÖ¹¶ÓÁÐ£¨ÔÚRTMÖÐ£©µÄ¶àÏß³Ìµ÷ÓÃ³åÍ»¡£
+	isBusy = true;//ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½RTMï¿½Ð£ï¿½ï¿½Ä¶ï¿½ï¿½ß³Ìµï¿½ï¿½Ã³ï¿½Í»ï¿½ï¿½
 
 	if (queue_PointsOfCapture.empty() || queue_TransformData.empty())
 	{
@@ -54,11 +54,11 @@ void Transform_PointCloud()
 
 	pcl::transformPointCloud(*queue_PointsOfCapture.front(), *tmp, queue_TransformData.front());
 
-	//µ÷ÓÃÍêºóµ¯³ö¶ÓÁÐ
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½óµ¯³ï¿½ï¿½ï¿½ï¿½ï¿½
 	queue_PointsOfCapture.pop();
 	queue_TransformData.pop();
 
-	isBusy = false;//¹Ø±ÕÃ¦±êÖ¾£¬Ê¹ÄÜ¶ÓÁÐ²Ù×÷¡£
+	isBusy = false;//ï¿½Ø±ï¿½Ã¦ï¿½ï¿½Ö¾ï¿½ï¿½Ê¹ï¿½Ü¶ï¿½ï¿½Ð²ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	Filters(tmp, tmp2);
 
@@ -66,10 +66,10 @@ void Transform_PointCloud()
 	if (PointsOfTable.size() != 0)
 		ICP_Single(tmp2, PointsOfTable, tmp3);
 
-	*PointsOfTable += *tmp2;//ÀÛ¼ÓµãÔÆ
+	*PointsOfTable += *tmp2;//ï¿½Û¼Óµï¿½ï¿½ï¿½
 }
 
-//Ö÷¶¯´¥·¢
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 std::string Clear_QueueAndPoints()
 {
 	if (isBusy)
@@ -88,13 +88,13 @@ std::string Clear_QueueAndPoints()
 	return "Clear_Queue_Points() Success!";
 }
 
-//Ö÷¶¯´¥·¢
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 std::string SwitchSysMode(std::string ModeStr)
 {
 	switch (SystemMode)
 	{
-		case Capture://µ±Ç°Ä£Ê½
-			switch (ModeStr)//Ä¿±êÄ£Ê½
+		case Capture://ï¿½ï¿½Ç°Ä£Ê½
+			switch (ModeStr)//Ä¿ï¿½ï¿½Ä£Ê½
 			{
 				case "CaptureMode":
 					return "Now CaptureMode. No need to switch!"
@@ -109,7 +109,7 @@ std::string SwitchSysMode(std::string ModeStr)
 			}
 			break;
 		case Process:
-			switch (ModeStr)//Ä¿±êÄ£Ê½
+			switch (ModeStr)//Ä¿ï¿½ï¿½Ä£Ê½
 			{
 				case "CaptureMode":
 					SystemMode = Capture;
@@ -142,15 +142,15 @@ Eigen::Matrix4f MakeTransformMatrix(double Data[4][4])
 
 PCXYZ_Ptr Filters(PCXYZ_Ptr Source, PCXYZ_Ptr Output)
 {
-#pragma region ¸÷¸öÂË²¨Æ÷±äÁ¿ÉùÃ÷£¬ÒÔ¼°ÂË²¨Æ÷ÉèÖÃ
+#pragma region ï¿½ï¿½ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	//
 	pcl::PassThrough<pcl::PointXYZ> PassFilter;
 	PassFilter.setFilterFieldName("z");
 	PassFilter.setFilterLimits(0.020, 0.50);
 
 	//
-	pcl::VoxelGrid<pcl::PointXYZ> VoxelGrid_sor;//ÐÂÉùÃ÷ÌåËØÍø¸ñ¶ÔÏó
-	VoxelGrid_sor.setLeafSize(0.005f, 0.005f, 0.005f);//Éè¶¨ÌåËØÍø¸ñ´óÐ¡
+	pcl::VoxelGrid<pcl::PointXYZ> VoxelGrid_sor;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	VoxelGrid_sor.setLeafSize(0.005f, 0.005f, 0.005f);//ï¿½è¶¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡
 	//
 	pcl::FastBilateralFilter<pcl::PointXYZ> fbf;
 	fbf.setSigmaS(1);
@@ -161,32 +161,32 @@ PCXYZ_Ptr Filters(PCXYZ_Ptr Source, PCXYZ_Ptr Output)
 	sor.setStddevMulThresh(0.6);
 #pragma endregion
 
-	/*===============¸÷¸öÂË²¨Æ÷Ö®¼äµÄÁÙÊ±±äÁ¿================*/
+	/*===============ï¿½ï¿½ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½Ö®ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½================*/
 	PCXYZ_Ptr tmp(new PCXYZ);
 	PCXYZ_Ptr tmp2(new PCXYZ);
 	PCXYZ_Ptr tmp3(new PCXYZ);
 	PCXYZ_Ptr tmp4(new PCXYZ);
-	/*===============ZÖáÏÞ¶¨·¶Î§================*/
+	/*===============Zï¿½ï¿½ï¿½Þ¶ï¿½ï¿½ï¿½Î§================*/
 
-	/*============<<<ÌåËØÍø¸ñÂË²¨================*/
+	/*============<<<ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë²ï¿½================*/
 	VoxelGrid_sor.setInputCloud(Source);
-	VoxelGrid_sor.filter(*tmp);//¹ýÂËµãÔÆ
-	/*===============ÌåËØÍø¸ñÂË²¨>>>=============*/
+	VoxelGrid_sor.filter(*tmp);//ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½
+	/*===============ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë²ï¿½>>>=============*/
 
 
-	/*============<<<´øÍ¨ÂË²¨Æ÷================*/ //Source->tmp
+	/*============<<<ï¿½ï¿½Í¨ï¿½Ë²ï¿½ï¿½ï¿½================*/ //Source->tmp
 	PassFilter.setInputCloud(tmp);
 	PassFilter.filter(*tmp2);
-	/*======END======´øÍ¨ÂË²¨Æ÷>>>====END======*/
+	/*======END======ï¿½ï¿½Í¨ï¿½Ë²ï¿½ï¿½ï¿½>>>====END======*/
 
-#pragma region /*======Ë«±ßÂË²¨Æ÷FastBilateralFilter======*/²»ÓÃtmp -> tmp2
+#pragma region /*======Ë«ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½FastBilateralFilter======*/ï¿½ï¿½ï¿½ï¿½tmp -> tmp2
 	
 	CovertTo_OrgnizedPointCloud(tmp2, 640, 480);
 	fbf.setInputCloud(tmp2);
 	fbf.filter(*tmp3);
 #pragma endregion
 
-#pragma region /*===============È¥³ý¼«Öµ================*/²»ÓÃtmp2->tmp4
+#pragma region /*===============È¥ï¿½ï¿½ï¿½ï¿½Öµ================*/ï¿½ï¿½ï¿½ï¿½tmp2->tmp4
 	CovertTo_UnOrgnizedPointCloud(tmp3);
 	sor.setInputCloud(tmp3);
 	sor.filter(*Output);
@@ -197,15 +197,15 @@ PCXYZ_Ptr Filters(PCXYZ_Ptr Source, PCXYZ_Ptr Output)
 
 void CovertTo_OrgnizedPointCloud(PCXYZ_Ptr &Source, double Width, double Height)
 {
-	/**/////Ô­Ê¼µãÔÆ´óÐ¡(Size)=Height*Width S=H*W Scale=W/H
+	/**/////Ô­Ê¼ï¿½ï¿½ï¿½Æ´ï¿½Ð¡(Size)=Height*Width S=H*W Scale=W/H
 		//S=H*H*Scale
 		//H=sqrt(S/Scale)
 	double Scale = Width / Height;
 	double RealHeight = sqrt((*Source).size() / Scale);
 
-	(*Source).height = round(RealHeight);///×¢Òâ£¬²»ÄÜÈÃÐÂËãµÄ×ÜµãÊý³¬¹ýÕæÊµµãÊý¡£
+	(*Source).height = round(RealHeight);///×¢ï¿½â£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Üµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	(*Source).width = RealHeight * Scale;
-	if ((*Source).height * (*Source).width > (*Source).size())//Èç¹ûÐÂËãµÄ´óÐ¡´óÓÚÔ­Ê¼µÄ£¬Ôò½«¿í¶È¼õÉÙ1£»
+	if ((*Source).height * (*Source).width > (*Source).size())//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½Ô­Ê¼ï¿½Ä£ï¿½ï¿½ò½«¿ï¿½È¼ï¿½ï¿½ï¿½1ï¿½ï¿½
 		(*Source).width--;
 	(*Source).isOrgnized = true;
 }
@@ -217,7 +217,7 @@ void CovertTo_UnOrgnizedPointCloud(PCXYZ_Ptr &Source)
 	(*Source).isOrgnized = false;
 }
 
-void ExtractPlane(PCXYZ_Ptr Source, PCXYZ_Ptr Plane, PCXYZ_Ptr Rest)//³é³öÆ½Ãæ£¬RestÈ¥³ýÆ½ÃæºóµÄµãÔÆ£»·µ»ØÖµÊÇ³é³öµÄÆ½Ãæ¡£
+void ExtractPlane(PCXYZ_Ptr Source, PCXYZ_Ptr Plane, PCXYZ_Ptr Rest)//ï¿½ï¿½ï¿½Æ½ï¿½æ£¬RestÈ¥ï¿½ï¿½Æ½ï¿½ï¿½ï¿½Äµï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½Ç³ï¿½ï¿½ï¿½ï¿½Æ½ï¿½æ¡£
 {
 	pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
 	pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
@@ -236,8 +236,8 @@ void ExtractPlane(PCXYZ_Ptr Source, PCXYZ_Ptr Plane, PCXYZ_Ptr Rest)//³é³öÆ½Ãæ£¬
 	if (inliers->indices.size() == 0)
 		PCL_ERROR("Could not estimate a planar model for the given dataset.");
 
-	//Êä³ö´¦Àí
-	pcl::ExtractIndices<pcl::PointXYZ> extract;//ÓÉÓÚSACSegmentation³é³öÀ´µÄÖ»ÊÇµãµÄÊýÖµ£¬ÐèÒª½«ÊýÖµ×ª»¯ÎªµãÔÆ¡£Õâ¸öÀà±ãÊÇ×¨ÃÅÀ´¸ÉÕâ¸öµÄ¡£
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	pcl::ExtractIndices<pcl::PointXYZ> extract;//ï¿½ï¿½ï¿½ï¿½SACSegmentationï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½Çµï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Öµ×ªï¿½ï¿½Îªï¿½ï¿½ï¿½Æ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¡ï¿½
 	extract.setInputCloud(Source);
 	extract.setIndices(inliers);
 	extract.setNegative(false);
@@ -285,7 +285,7 @@ Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output)
 
 	icp.setMaximumIterations(300);
 	icp.setInputSource(Source);
-	icp.setInputTarget(Target);//Õâ¸öµãÔÆ²»¶¯£¬ÆäËûµãÔÆ¸úTargetÅäºÏ¡£ptr_To_ICP_cloud[0]
+	icp.setInputTarget(Target);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¸ï¿½Targetï¿½ï¿½Ï¡ï¿½ptr_To_ICP_cloud[0]
 	icp.align(*Output);
 
 	if (icp.hasConverged())
