@@ -2,10 +2,6 @@
 #include <queue>
 #include <mutex>
 
-void CovertTo_OrgnizedPointCloud(PCXYZ_Ptr &Source, double Width, double Height);
-void CovertTo_UnOrgnizedPointCloud(PCXYZ_Ptr &Source);
-Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output);
-
 //滤波处理
 enum PointCloudProcessMode{Capture, Process};
 //先是数据读入状态，接收【当前机械臂位姿】信号
