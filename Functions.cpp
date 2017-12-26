@@ -1,23 +1,23 @@
-#include "Functions.h"
+﻿#include "Functions.h"
 #include <queue>
 
 void CovertTo_OrgnizedPointCloud(PCXYZ_Ptr &Source, double Width, double Height);
 void CovertTo_UnOrgnizedPointCloud(PCXYZ_Ptr &Source);
 Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output);
 
-//�˲�����
+//滤波处理
 enum PointCloudProcessMode{Capture, Process};
-//�������ݶ���״̬�����ա���ǰ��е��λ�ˡ��ź�
-bool isBusy = false;//�Ƿ����ڴ�����ơ�
+//先是数据读入状态，接收【当前机械臂位姿】信号
+bool isBusy = false;//是否正在处理点云。
 PointCloudProcessMode SystemMode = Capture;
 
-PCXYZ_Ptr PointsOfTable(new PCXYZ);//�ϳɺ�����ӵĵ��ơ�
-std::queue<PCXYZ_Ptr> queue_PointsOfCapture;//������ĵ��ƵĴ�Ŷ��С�
-std::queue<Eigen::Matrix4f> queue_TransformData;//������ĵ��Ƶ�λ�˾���
-// ��Ϊ���������ĺ���
+PCXYZ_Ptr PointsOfTable(new PCXYZ);//合成后的桌子的点云。
+std::queue<PCXYZ_Ptr> queue_PointsOfCapture;//被捕获的点云的存放队列。
+std::queue<Eigen::Matrix4f> queue_TransformData;//被捕获的点云的位姿矩阵。
+// 作为主动触发的函数
 std::string Capture_PointClould(double TransformData[4][4])/****RTM****/
 {
-	PCXYZ_Ptr DataIn = PCXYZ_Ptr(new PCXYZ());//��ʱ�򻻳�RTM�������������
+	PCXYZ_Ptr DataIn = PCXYZ_Ptr(new PCXYZ());//到时候换成RTM点云输入变量。
 
 	if (isBusy)
 		return "Processing!";
@@ -32,7 +32,7 @@ std::string Capture_PointClould(double TransformData[4][4])/****RTM****/
 	return "Capture_PointClould() Success!";
 }
 
-//Ӧ����OnExecute�����ڣ��� ���� ģʽʱ��ÿ���ڵ��á�
+//应该在OnExecute函数内，在 拍摄 模式时，每周期调用。
 void Transform_PointCloud()
 {
 	if (SystemMode != Capture)
@@ -40,7 +40,7 @@ void Transform_PointCloud()
 
 	if (isBusy)
 		return;
-	isBusy = true;//��ֹ���У���RTM�У��Ķ��̵߳��ó�ͻ��
+	isBusy = true;//防止队列（在RTM中）的多线程调用冲突。
 
 	if (queue_PointsOfCapture.empty() || queue_TransformData.empty())
 	{
@@ -54,11 +54,11 @@ void Transform_PointCloud()
 
 	pcl::transformPointCloud(*queue_PointsOfCapture.front(), *tmp, queue_TransformData.front());
 
-	//������󵯳�����
+	//调用完后弹出队列
 	queue_PointsOfCapture.pop();
 	queue_TransformData.pop();
 
-	isBusy = false;//�ر�æ��־��ʹ�ܶ��в�����
+	isBusy = false;//关闭忙标志，使能队列操作。
 
 	Filters(tmp, tmp2);
 
@@ -66,10 +66,10 @@ void Transform_PointCloud()
 	if (PointsOfTable.size() != 0)
 		ICP_Single(tmp2, PointsOfTable, tmp3);
 
-	*PointsOfTable += *tmp2;//�ۼӵ���
+	*PointsOfTable += *tmp2;//累加点云
 }
 
-//��������
+//主动触发
 std::string Clear_QueueAndPoints()
 {
 	if (isBusy)
@@ -88,13 +88,13 @@ std::string Clear_QueueAndPoints()
 	return "Clear_Queue_Points() Success!";
 }
 
-//��������
+//主动触发
 std::string SwitchSysMode(std::string ModeStr)
 {
 	switch (SystemMode)
 	{
-		case Capture://��ǰģʽ
-			switch (ModeStr)//Ŀ��ģʽ
+		case Capture://当前模式
+			switch (ModeStr)//目标模式
 			{
 				case "CaptureMode":
 					return "Now CaptureMode. No need to switch!"
@@ -109,7 +109,7 @@ std::string SwitchSysMode(std::string ModeStr)
 			}
 			break;
 		case Process:
-			switch (ModeStr)//Ŀ��ģʽ
+			switch (ModeStr)//目标模式
 			{
 				case "CaptureMode":
 					SystemMode = Capture;
@@ -142,15 +142,15 @@ Eigen::Matrix4f MakeTransformMatrix(double Data[4][4])
 
 PCXYZ_Ptr Filters(PCXYZ_Ptr Source, PCXYZ_Ptr Output)
 {
-#pragma region �����˲��������������Լ��˲�������
+#pragma region 各个滤波器变量声明，以及滤波器设置
 	//
 	pcl::PassThrough<pcl::PointXYZ> PassFilter;
 	PassFilter.setFilterFieldName("z");
 	PassFilter.setFilterLimits(0.020, 0.50);
 
 	//
-	pcl::VoxelGrid<pcl::PointXYZ> VoxelGrid_sor;//�����������������
-	VoxelGrid_sor.setLeafSize(0.005f, 0.005f, 0.005f);//�趨���������С
+	pcl::VoxelGrid<pcl::PointXYZ> VoxelGrid_sor;//新声明体素网格对象
+	VoxelGrid_sor.setLeafSize(0.005f, 0.005f, 0.005f);//设定体素网格大小
 	//
 	pcl::FastBilateralFilter<pcl::PointXYZ> fbf;
 	fbf.setSigmaS(1);
@@ -161,32 +161,32 @@ PCXYZ_Ptr Filters(PCXYZ_Ptr Source, PCXYZ_Ptr Output)
 	sor.setStddevMulThresh(0.6);
 #pragma endregion
 
-	/*===============�����˲���֮�����ʱ����================*/
+	/*===============各个滤波器之间的临时变量================*/
 	PCXYZ_Ptr tmp(new PCXYZ);
 	PCXYZ_Ptr tmp2(new PCXYZ);
 	PCXYZ_Ptr tmp3(new PCXYZ);
 	PCXYZ_Ptr tmp4(new PCXYZ);
-	/*===============Z���޶���Χ================*/
+	/*===============Z轴限定范围================*/
 
-	/*============<<<���������˲�================*/
+	/*============<<<体素网格滤波================*/
 	VoxelGrid_sor.setInputCloud(Source);
-	VoxelGrid_sor.filter(*tmp);//���˵���
-	/*===============���������˲�>>>=============*/
+	VoxelGrid_sor.filter(*tmp);//过滤点云
+	/*===============体素网格滤波>>>=============*/
 
 
-	/*============<<<��ͨ�˲���================*/ //Source->tmp
+	/*============<<<带通滤波器================*/ //Source->tmp
 	PassFilter.setInputCloud(tmp);
 	PassFilter.filter(*tmp2);
-	/*======END======��ͨ�˲���>>>====END======*/
+	/*======END======带通滤波器>>>====END======*/
 
-#pragma region /*======˫���˲���FastBilateralFilter======*/����tmp -> tmp2
+#pragma region /*======双边滤波器FastBilateralFilter======*/不用tmp -> tmp2
 	
 	CovertTo_OrgnizedPointCloud(tmp2, 640, 480);
 	fbf.setInputCloud(tmp2);
 	fbf.filter(*tmp3);
 #pragma endregion
 
-#pragma region /*===============ȥ����ֵ================*/����tmp2->tmp4
+#pragma region /*===============去除极值================*/不用tmp2->tmp4
 	CovertTo_UnOrgnizedPointCloud(tmp3);
 	sor.setInputCloud(tmp3);
 	sor.filter(*Output);
@@ -197,15 +197,15 @@ PCXYZ_Ptr Filters(PCXYZ_Ptr Source, PCXYZ_Ptr Output)
 
 void CovertTo_OrgnizedPointCloud(PCXYZ_Ptr &Source, double Width, double Height)
 {
-	/**/////ԭʼ���ƴ�С(Size)=Height*Width S=H*W Scale=W/H
+	/**/////原始点云大小(Size)=Height*Width S=H*W Scale=W/H
 		//S=H*H*Scale
 		//H=sqrt(S/Scale)
 	double Scale = Width / Height;
 	double RealHeight = sqrt((*Source).size() / Scale);
 
-	(*Source).height = round(RealHeight);///ע�⣬������������ܵ���������ʵ������
+	(*Source).height = round(RealHeight);///注意，不能让新算的总点数超过真实点数。
 	(*Source).width = RealHeight * Scale;
-	if ((*Source).height * (*Source).width > (*Source).size())//�������Ĵ�С����ԭʼ�ģ��򽫿�ȼ���1��
+	if ((*Source).height * (*Source).width > (*Source).size())//如果新算的大小大于原始的，则将宽度减少1；
 		(*Source).width--;
 	(*Source).isOrgnized = true;
 }
@@ -217,7 +217,7 @@ void CovertTo_UnOrgnizedPointCloud(PCXYZ_Ptr &Source)
 	(*Source).isOrgnized = false;
 }
 
-void ExtractPlane(PCXYZ_Ptr Source, PCXYZ_Ptr Plane, PCXYZ_Ptr Rest)//���ƽ�棬Restȥ��ƽ���ĵ��ƣ�����ֵ�ǳ����ƽ�档
+void ExtractPlane(PCXYZ_Ptr Source, PCXYZ_Ptr Plane, PCXYZ_Ptr Rest)//抽出平面，Rest去除平面后的点云；返回值是抽出的平面。
 {
 	pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
 	pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
@@ -236,8 +236,8 @@ void ExtractPlane(PCXYZ_Ptr Source, PCXYZ_Ptr Plane, PCXYZ_Ptr Rest)//����
 	if (inliers->indices.size() == 0)
 		PCL_ERROR("Could not estimate a planar model for the given dataset.");
 
-	//�������
-	pcl::ExtractIndices<pcl::PointXYZ> extract;//����SACSegmentation�������ֻ�ǵ����ֵ����Ҫ����ֵת��Ϊ���ơ���������ר����������ġ�
+	//输出处理
+	pcl::ExtractIndices<pcl::PointXYZ> extract;//由于SACSegmentation抽出来的只是点的数值，需要将数值转化为点云。这个类便是专门来干这个的。
 	extract.setInputCloud(Source);
 	extract.setIndices(inliers);
 	extract.setNegative(false);
@@ -285,7 +285,7 @@ Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output)
 
 	icp.setMaximumIterations(300);
 	icp.setInputSource(Source);
-	icp.setInputTarget(Target);//������Ʋ������������Ƹ�Target��ϡ�ptr_To_ICP_cloud[0]
+	icp.setInputTarget(Target);//这个点云不动，其他点云跟Target配合。ptr_To_ICP_cloud[0]
 	icp.align(*Output);
 
 	if (icp.hasConverged())

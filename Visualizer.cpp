@@ -1,14 +1,14 @@
-#include "Visualizer.h"
+ï»¿#include "Visualizer.h"
 #include "ThreadPool.h"
 
-std::thread VisualizationThread = std::thread();//ÉùÃ÷Ïß³Ì¶ÔÏó
+std::thread VisualizationThread = std::thread();//å£°æ˜Žçº¿ç¨‹å¯¹è±¡
 std::ThreadPool VisualizationThreadPool(5);
 std::mutex mtx;
 
 void VisualizationProcess_PCXYZ(pcl::PointCloud<pcl::PointXYZ>::Ptr Data);
 void VisualizationProcess_PCXYZ_Array(pcl::PointCloud<pcl::PointXYZ>::Ptr Data[], int NumOfData);
 
-//ÊÓ¾õ»¯-¶àÏß³Ì°æ±¾¡£
+//è§†è§‰åŒ–-å¤šçº¿ç¨‹ç‰ˆæœ¬ã€‚
 void PointCloud_Visualizator(pcl::PointCloud<pcl::PointXYZ>::Ptr Data)
 {
 	VisualizationThreadPool.commit(VisualizationProcess_PCXYZ, Data);
@@ -18,7 +18,7 @@ void PointCloud_Visualizator(pcl::PointCloud<pcl::PointXYZ> Data)
 	pcl::PointCloud<pcl::PointXYZ>::Ptr tmp = Data.makeShared();
 	VisualizationThreadPool.commit(VisualizationProcess_PCXYZ, tmp);
 }
-//ÊÓ¾õ»¯-µãÔÆÊý×é-¶àÏß³Ì°æ±¾¡£
+//è§†è§‰åŒ–-ç‚¹äº‘æ•°ç»„-å¤šçº¿ç¨‹ç‰ˆæœ¬ã€‚
 void PointCloud_Visualizator(pcl::PointCloud<pcl::PointXYZ>::Ptr Data[], int NumOfData)
 {
 	VisualizationThreadPool.commit(VisualizationProcess_PCXYZ_Array, Data, NumOfData);
@@ -31,7 +31,7 @@ void PointCloud_Visualizator(pcl::PointCloud<pcl::PointXYZ> Data[], int NumOfDat
 	VisualizationThreadPool.commit(VisualizationProcess_PCXYZ_Array, tmp, NumOfData);
 }
 
-//ÊÓ¾õ»¯-×èÈûÖ÷Ïß³Ì°æ±¾¡£
+//è§†è§‰åŒ–-é˜»å¡žä¸»çº¿ç¨‹ç‰ˆæœ¬ã€‚
 void PointCloud_Visualizator_Stuck(pcl::PointCloud<pcl::PointXYZ>::Ptr Data)
 {
 	VisualizationProcess_PCXYZ(Data);
@@ -41,7 +41,7 @@ void PointCloud_Visualizator_Stuck(pcl::PointCloud<pcl::PointXYZ> Data)
 	pcl::PointCloud<pcl::PointXYZ>::Ptr tmp = Data.makeShared();
 	VisualizationProcess_PCXYZ(tmp);
 }
-//ÊÓ¾õ»¯-µãÔÆÊý×é-×èÈûÖ÷Ïß³Ì°æ±¾¡£
+//è§†è§‰åŒ–-ç‚¹äº‘æ•°ç»„-é˜»å¡žä¸»çº¿ç¨‹ç‰ˆæœ¬ã€‚
 void PointCloud_Visualizator_Stuck(pcl::PointCloud<pcl::PointXYZ>::Ptr Data[], int NumOfData)
 {
 	VisualizationProcess_PCXYZ_Array(Data, NumOfData);

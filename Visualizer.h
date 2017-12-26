@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #ifndef _VISUALIZER_H_
 #define _VISUALIZER_H_
@@ -11,14 +11,14 @@ extern std::mutex mtx;
 
 pcl::PointXYZRGB HSV2RGB(double H, double S, double V, double RangeH = 360, double RangeS = 255, double RangeV = 255, double RangeR = 255, double RangeG = 255, double RangeB = 255);
 
-//ÊÓ¾õ»¯-¶àÏß³Ì°æ±¾¡£
+//è§†è§‰åŒ–-å¤šçº¿ç¨‹ç‰ˆæœ¬ã€‚
 void PointCloud_Visualizator(pcl::PointCloud<pcl::PointXYZ>::Ptr Data);
 void PointCloud_Visualizator(pcl::PointCloud<pcl::PointXYZ> Data);
 
 void PointCloud_Visualizator(pcl::PointCloud<pcl::PointXYZ>::Ptr Data[], int NumOfData);
 void PointCloud_Visualizator(pcl::PointCloud<pcl::PointXYZ> Data[], int NumOfData);
 
-//ÊÓ¾õ»¯-×èÈûÖ÷Ïß³Ì°æ±¾¡£
+//è§†è§‰åŒ–-é˜»å¡žä¸»çº¿ç¨‹ç‰ˆæœ¬ã€‚
 void PointCloud_Visualizator_Stuck(pcl::PointCloud<pcl::PointXYZ>::Ptr Data);
 void PointCloud_Visualizator_Stuck(pcl::PointCloud<pcl::PointXYZ> Data);
 
